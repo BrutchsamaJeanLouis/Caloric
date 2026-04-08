@@ -183,9 +183,9 @@ beta_end: 0.02                 # β_T (stronger terminal noise)
 schedule_type: "linear"        # Options: "linear", "cosine"
 
 # === Substrate ===
-dataset: "mnist"               # Options: "mnist", "cifar10"
-image_size: 28                 # Native MNIST resolution
-channels: 1                    # Grayscale for MNIST
+dataset: "mnist"               # MNIST only. Do not change without explicit instruction.
+image_size: 28                 # Native MNIST resolution. Do not resize.
+channels: 1                    # Grayscale. Do not change.
 
 # === Constraint Field (U-Net) ===
 base_channels: 64              # Base channel count
@@ -234,6 +234,16 @@ Ordered. Complete each before starting the next.
 
 ### Phase 5: Trajectory Visualisation
 9. Full trajectory rendering: side-by-side forward (dissipation) and reverse (formation). This is the **primary demonstration output** — the visual that makes the thermodynamic substrate self-evident.
+
+---
+
+## Dataset
+
+- **Primary**: MNIST (28×28 grayscale, 60k training images). This is the only dataset to implement unless explicitly requested.
+- **Do not** substitute Fashion-MNIST, CIFAR-10, CelebA, or any other dataset without explicit instruction.
+- **Do not** download datasets larger than MNIST without explicit instruction.
+- MNIST is chosen deliberately — it is small enough to train quickly, visually legible enough to demonstrate formation/dissipation trajectories clearly, and imposes no licensing complications for publication.
+- Use `torchvision.datasets.MNIST` with automatic download. Normalise to [-1, 1].
 
 ---
 
