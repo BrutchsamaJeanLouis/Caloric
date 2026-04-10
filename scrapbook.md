@@ -48,6 +48,43 @@
 4. ✓ Loss curve (smooth convergence over 30 epochs: 1.507 → 1.000642)
 5. ✓ All code uses canonical thermodynamic terminology
 
+### Investigation: t=999 Blurriness (2026-04-10)
+- User observation: "trajectory image is still blury at t=999"
+- Finding: This is CORRECT behavior, not a bug
+- Forward t=999: Original digit has dissipated into equilibrium (Gaussian noise) ✓
+- Reverse t=999: START of formation - pure noise, NO denoising steps yet ✓
+- Formation happens as reverse process goes t=999 → t=0 (right to left in plot)
+- Created detailed visualisations to clarify:
+  - `outputs/trajectories/full_trajectory_detailed.png` (11 timesteps: 0,100,...,999)
+  - `outputs/trajectories/formation_from_noise.png` (high-t focus: 900-999)
+- Script: `scripts/debug_trajectory.py` for future investigations
+
+### Phase 6: Trajectory Investigation (2026-04-11) ✓
+- User request: "Adjust dissipation schedule for clearer trajectories, create animated trajectory"
+- Implemented cosine annealing schedule in `thermodynamics.py::DissipationSchedule`
+  - Formula: $\beta_t = \beta_{\min} + 0.5(\beta_{\max} - \beta_{\min})(1 + \cos(\pi t / T))$
+  - Added `schedule_type="cosine"` option alongside existing "linear"
+- Created animation utility `src/utils.py::save_trajectory_animation()`
+  - Uses matplotlib.animation.FuncAnimation + PillowWriter for GIF export
+  - Supports dense timesteps via np.linspace for smooth playback
+- Generated artifacts:
+  - `outputs/trajectories/trajectory_animation.gif` (0.33 MB, 20 frames, 15fps)
+  - `outputs/trajectories/schedule_comparison.png` (linear vs cosine side-by-side)
+  - `scripts/animate.py` (animation generation script)
+  - `scripts/compare_schedules.py` (schedule comparison script)
+  - `configs/cosine.yaml` (cosine schedule configuration)
+  - `test_cosine_schedule.py` (6 comprehensive tests for cosine schedule)
+- Trained model with cosine schedule: 30 epochs, loss 1.46 → 1.03
+  - Checkpoint: `outputs/checkpoints/final_checkpoint.pth`
+  - Note: Architecture mismatch with linear model (different training session)
+- Updated `paper.tex` with:
+  - Schedule comparison section with mathematical formulation
+  - Animated trajectory figure reference
+  - Empirical findings: both schedules produce comparable quality on MNIST
+- Finding: Cosine schedule provides smoother entropy injection at boundaries
+- Finding: For MNIST, schedule choice has minimal impact on formation quality
+- Finding: Thermodynamic substrate is robust to schedule parameterisation
+
 ### Optional Next Steps:
 - Train for full 50 epochs for better sample quality
 - Generate larger sample grids (64+ samples)

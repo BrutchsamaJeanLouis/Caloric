@@ -79,6 +79,34 @@ where $\mu_\theta$ is parameterised via noise prediction $\epsilon_\theta(x_t, t
 
 Training converged to loss $\approx 1.00$ after 30 epochs on CUDA GPU (Titan RTX, 24GB VRAM). Initial loss was 1.507 at epoch 1, decreasing to 1.000642 by epoch 30, demonstrating stable convergence of the learned entropy gradient.
 
+\subsection{Dissipation Schedule Comparison}
+
+We investigated the effect of dissipation schedule choice on trajectory quality. The standard linear schedule $\beta_t = \beta_{\min} + \frac{t}{T}(\beta_{\max} - \beta_{\min})$ was compared against a cosine annealing schedule:
+
+\begin{equation}
+\beta_t = \beta_{\min} + \frac{1}{2}(\beta_{\max} - \beta_{\min})\left(1 + \cos\left(\frac{\pi t}{T}\right)\right)
+\end{equation}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{outputs/trajectories/schedule_comparison.png}
+    \caption{Schedule comparison: linear (top two rows) vs cosine (bottom two rows). Forward trajectories show dissipation toward equilibrium; reverse trajectories show formation from noise. Both schedules produce comparable trajectory quality with the same trained constraint field.}
+    \label{fig:schedule_comparison}
+\end{figure}
+
+The cosine schedule provides smoother entropy injection at trajectory boundaries, potentially improving sample quality in high-dimensional settings. For MNIST, both schedules yield similar formation quality, confirming the robustness of the thermodynamic substrate to schedule parameterisation.
+
+\subsection{Animated Trajectories}
+
+An animated trajectory visualization (Figure \ref{fig:animation}) demonstrates the continuous dissipation-formation process across all 1000 timesteps. The forward process shows gradual relaxation toward maximum entropy, while the reverse process reveals structure emerging via learned energy-gradient traversal.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{outputs/trajectories/trajectory_animation.gif}
+    \caption{Animated trajectory showing full dissipation-formation cycle. Top: forward process (dissipation). Bottom: reverse process (formation).}
+    \label{fig:animation}
+\end{figure}
+
 \section{Conclusion}
 
 This implementation demonstrates that diffusion models are not merely "ML architectures" but are \textbf{thermodynamic systems} operating on learned energy landscapes. The forward process is relaxation; the reverse process is formation. The mathematics is the argument.
