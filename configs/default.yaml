@@ -1,0 +1,32 @@
+# === Dissipation Schedule ===
+T: 1000                        # Total diffusion timesteps
+beta_start: 0.0001             # β_1 (minimal initial noise)
+beta_end: 0.02                 # β_T (stronger terminal noise)
+schedule_type: "linear"        # Options: "linear", "cosine"
+
+# === Substrate ===
+dataset: "mnist"               # MNIST only. Do not change without explicit instruction.
+image_size: 28                 # Native MNIST resolution. Do not resize.
+channels: 1                    # Grayscale. Do not change.
+
+# === Constraint Field (U-Net) ===
+base_channels: 64              # Base channel count
+channel_multipliers: [1, 2, 4] # Per-resolution multiplier
+num_res_blocks: 2              # Residual blocks per resolution
+attention_resolutions: [14]    # Resolutions with self-attention
+dropout: 0.1
+modulation_dim: 256            # Time embedding dimension
+
+# === Training ===
+batch_size: 128
+learning_rate: 2e-4
+optimizer: "adam"
+ema_decay: 0.9999              # Exponential moving average for stable generation
+num_epochs: 50                 # ~50 epochs sufficient for MNIST
+gradient_clip: 1.0
+seed: 42
+
+# === Sampling ===
+num_samples: 64                # Per generation call
+save_trajectory: true          # Save intermediate x_t for visualisation
+trajectory_steps: [0, 100, 250, 500, 750, 999]  # Timesteps to snapshot

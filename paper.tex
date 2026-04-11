@@ -40,7 +40,7 @@ The learned reverse:
 p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \sigma_t^2 \cdot \mathbf{I})
 \end{equation}
 
-where $\mu_\theta$ is parameterised via noise prediction $\epsilon_\theta(x_t, t)$, which approximates the \textbf{score function} $\nabla_x \log p(x_t)$.
+where $\mu_\theta$ is parameterised via noise prediction $\epsilon_\theta(x_t, t)$, which approximates the \textbf{score function} $\nabla_x \log p(x_t)$. The variance $\sigma_t^2$ controls \textbf{fluctuation magnitude} during formation --- fixed in this implementation, but learnable variants reveal the fluctuation-dissipation relationship explicitly.
 
 \subsection{Training Objective}
 
@@ -48,7 +48,7 @@ where $\mu_\theta$ is parameterised via noise prediction $\epsilon_\theta(x_t, t
 \mathcal{L}_{\text{simple}} = \mathbb{E}_{t, x_0, \epsilon} \left[ \| \epsilon - \epsilon_\theta(x_t, t) \|^2 \right]
 \end{equation}
 
-\textbf{Thermodynamic reading:} We train the network to learn the \textbf{exact entropy gradient} at every point along the dissipation trajectory.
+\textbf{Thermodynamic reading:} $\mathcal{L}_{\text{simple}}$ is a simplified variational bound that drops KL terms from the full ELBO. The network learns an \textbf{approximation of the score function} --- the entropy gradient along the dissipation trajectory.
 
 \section{Implementation}
 
@@ -56,7 +56,7 @@ where $\mu_\theta$ is parameterised via noise prediction $\epsilon_\theta(x_t, t
 
 \begin{itemize}
     \item \textbf{Constraint Field:} U-Net with time-step modulation (sinusoidal embedding)
-    \item \textbf{Dissipation Schedule:} Linear $\beta_t \in [0.0001, 0.02]$ over $T=1000$ steps
+    \item \textbf{Dissipation Schedule:} Linear $\beta_t \in [0.0001, 0.02]$ over $T=1000$ steps. \textit{Limitation:} Linear schedules waste capacity on near-equilibrium states where little structure remains. Cosine schedules (Nichol \& Dhariwal, 2021) provide more uniform signal-to-noise ratio across timesteps.
     \item \textbf{Substrate:} MNIST (28$\times$28 grayscale, normalised to $[-1, 1]$)
     \item \textbf{Training:} Adam ($\text{lr}=2\text{e-}4$), batch size 128, EMA decay 0.9999
 \end{itemize}
@@ -77,7 +77,7 @@ where $\mu_\theta$ is parameterised via noise prediction $\epsilon_\theta(x_t, t
     \label{fig:trajectory}
 \end{figure}
 
-Training converged to loss $\approx 1.00$ after 30 epochs on CUDA GPU (Titan RTX, 24GB VRAM). Initial loss was 1.507 at epoch 1, decreasing to 1.000642 by epoch 30, demonstrating stable convergence of the learned entropy gradient.
+Training showed stable convergence: loss decreased from 1.507 (epoch 1) to 1.000642 (epoch 30) on CUDA GPU (Titan RTX, 24GB VRAM). Loss plateaued near 1.00, suggesting the model has learned a consistent score approximation. Extended training (50+ epochs) would clarify whether further refinement is possible.
 
 \subsection{Dissipation Schedule Comparison}
 
@@ -96,20 +96,9 @@ We investigated the effect of dissipation schedule choice on trajectory quality.
 
 The cosine schedule provides smoother entropy injection at trajectory boundaries, potentially improving sample quality in high-dimensional settings. For MNIST, both schedules yield similar formation quality, confirming the robustness of the thermodynamic substrate to schedule parameterisation.
 
-\subsection{Animated Trajectories}
-
-An animated trajectory visualization (Figure \ref{fig:animation}) demonstrates the continuous dissipation-formation process across all 1000 timesteps. The forward process shows gradual relaxation toward maximum entropy, while the reverse process reveals structure emerging via learned energy-gradient traversal.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.6\textwidth]{outputs/trajectories/trajectory_animation.gif}
-    \caption{Animated trajectory showing full dissipation-formation cycle. Top: forward process (dissipation). Bottom: reverse process (formation).}
-    \label{fig:animation}
-\end{figure}
-
 \section{Conclusion}
 
-This implementation demonstrates that diffusion models are not merely "ML architectures" but are \textbf{thermodynamic systems} operating on learned energy landscapes. The forward process is relaxation; the reverse process is formation. The mathematics is the argument.
+This implementation demonstrates that diffusion models are not merely "ML architectures" but are \textbf{thermodynamic systems} operating on learned energy landscapes. The forward process is relaxation; the reverse process is formation. The mathematics presented is standard DDPM derivation; the \textbf{argument} is the interpretive lens that makes the thermodynamic substrate visible.
 
 \section{References}
 
@@ -117,6 +106,7 @@ This implementation demonstrates that diffusion models are not merely "ML archit
     \item Sohl-Dickstein et al. (2015). \textit{Deep Unsupervised Learning using Nonequilibrium Thermodynamics.} ICML.
     \item Ho, Jain, \& Abbeel (2020). \textit{Denoising Diffusion Probabilistic Models.} NeurIPS.
     \item Song \& Ermon (2019). \textit{Generative Modeling by Estimating Gradients of the Data Distribution.} NeurIPS.
+    \item Nichol \& Dhariwal (2021). \textit{Improved Denoising Diffusion Probabilistic Models.} arXiv.
 \end{itemize}
 
 \end{document}
