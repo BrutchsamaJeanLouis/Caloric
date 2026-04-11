@@ -4,12 +4,16 @@
 \usepackage{hyperref}
 
 \title{Thermodynamic Diffusion: A Minimal DDPM Implementation}
-\author{}
-\date{}
+\author{Brutchsama Jean-Louis}
+\date{\today}
 
 \begin{document}
 
 \maketitle
+
+\begin{abstract}
+This artifact demonstrates a minimal Denoising Diffusion Probabilistic Model (DDPM) on MNIST, foregrounding the thermodynamic origins of diffusion models. The forward diffusion process is thermodynamic relaxation: structured signal dissipating toward maximum entropy (isotropic Gaussian noise). The reverse process is learned energy-gradient descent: a neural network recovering structure from noise by estimating the score function. We show that diffusion models are not merely "ML architectures" but are thermodynamic systems operating on learned energy landscapes. The implementation includes trajectory visualisations demonstrating dissipation-formation cycles, schedule comparisons (linear vs cosine), and generated samples. Code and checkpoints are provided for reproducibility.
+\end{abstract}
 
 \section{Introduction}
 
